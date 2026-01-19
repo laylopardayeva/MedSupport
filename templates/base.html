@@ -1,0 +1,412 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MedSupport</title>
+
+  <style>
+:root{
+  /* Backgrounds */
+  --bg: #E9EEF5;          /* soft cool gray-blue (NOT white) */
+  --card: #F4F7FB;        /* slightly darker than white */
+  --border: #CBD5E1;     /* visible but soft border */
+
+  /* Text */
+  --text: #0B1220;       /* strong readable text */
+  --muted: #5B6B82;      /* calm muted text */
+
+  /* Brand / actions */
+  --blue: #4A7BD9;       /* medical blue, softer than bright */
+  --red: #E55353;        /* emergency red (controlled) */
+  --cyan: #3FB6A8;       /* calm healing green */
+
+  --radius:18px;
+}
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(900px 500px at 15% 0%, rgba(77,163,255,.22), transparent 55%),
+        radial-gradient(900px 500px at 85% 10%, rgba(255,77,79,.16), transparent 60%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .shell{max-width:420px;margin:0 auto;padding:18px 18px 40px;}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;padding:14px;border-radius:var(--radius);
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      backdrop-filter:blur(10px);
+    }
+
+    .brand{display:flex;align-items:center;gap:12px;}
+    .logoWrap{
+      width:44px;height:44px;border-radius:14px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
+      display:grid;place-items:center;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      object-fit:contain;background:#fff;
+    }
+    .brandName{margin:0;font-weight:900;font-size:18px;}
+    .brandSub{margin:0;font-size:12px;color:var(--muted);}
+
+    .hero{margin:16px 0 14px;}
+    .hello{margin:0;color:var(--muted);font-size:12px;}
+    .question{margin:6px 0 0;font-weight:900;font-size:22px;}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+
+    .tile{
+      border-radius:22px;
+      padding:16px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.12);
+      background:var(--card);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      min-height:120px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      transition:.12s ease;
+    }
+    .tile:hover{transform:translateY(-2px);}
+
+    .t-blue{
+  background:linear-gradient(
+    180deg,
+    rgba(37,99,235,.45),
+    rgba(37,99,235,.12)
+  );
+}
+
+.t-cyan{
+  background:linear-gradient(
+    180deg,
+    rgba(6,182,212,.35),
+    rgba(6,182,212,.10)
+  );
+}
+
+.t-red{
+  background:linear-gradient(
+    180deg,
+    rgba(239,68,68,.35),
+    rgba(239,68,68,.12)
+  );
+}
+    .t-gray{background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));}
+
+    .icon{font-size:26px;}
+    .title{margin:8px 0 0;font-weight:900;font-size:15px;}
+    .sub{margin:4px 0 0;color:var(--muted);font-size:12px;}
+
+    .panel{
+      margin-top:14px;
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      padding:14px;
+    }
+    .panelTitle{margin:0 0 10px;font-weight:900;}
+
+    .row{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 12px;border-radius:14px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      margin-top:8px;
+      cursor:pointer;
+    }
+    .row span{color:var(--muted);font-size:12px;}
+
+    .rowLink{
+      text-decoration:none;
+      color:inherit;
+      display:block;
+    }
+
+    /* ===== ONLY ADDED FOR WORK-AS-NURSE MODAL (doesn't change anything else) ===== */
+    .modalOverlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      z-index:999;
+      padding:18px;
+    }
+    .modalCard{
+      max-width:420px;
+      margin:10vh auto 0;
+      background:rgba(11,18,32,.98);
+      border-radius:20px;
+      padding:16px;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:0 20px 60px rgba(0,0,0,.55);
+    }
+    .modalTitle{margin:0 0 6px;font-weight:900;font-size:18px;}
+    .modalSub{margin:0 0 12px;color:var(--muted);font-size:13px;}
+
+    .input{
+      width:100%;
+      box-sizing:border-box;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      outline:none;
+      font-size:14px;
+      margin-bottom:10px;
+    }
+    textarea.input{min-height:90px;resize:vertical;}
+
+    .btnPrimary{
+      width:100%;
+      padding:12px 14px;
+      border:none;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:900;
+      background: linear-gradient(180deg, rgba(77,163,255,.8), rgba(77,163,255,.45));
+      color:#07101f;
+    }
+    .btnGhost{
+      width:100%;
+      margin-top:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:900;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.16);
+      color: var(--text);
+    }
+    .successBox{
+      display:none;
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+       background:rgba(34,197,94,.15);
+       border:1px solid rgba(34,197,94,.45);
+      color:#22C55E;
+      font-size:13px;
+      line-height:1.35;
+    }
+    /* ===== end modal styles ===== */
+  </style>
+</head>
+
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logoWrap">
+        <img class="logo" src="{% static 'img/logo.png' %}" alt="MedSupport logo">
+      </div>
+      <div>
+        <p class="brandName">MedSupport</p>
+        <p class="brandSub">Nurse • SOS • Pharmacy</p>
+      </div>
+    </div>
+    <div style="color:var(--muted)">☰</div>
+  </div>
+
+  <div class="hero">
+    <p class="hello">Welcome back</p>
+    <h2 class="question">What do you need?</h2>
+  </div>
+
+  <div class="grid">
+
+    <a class="tile t-blue" href="/nurse/">
+      <div class="icon">👩‍⚕️</div>
+      <div>
+        <p class="title">Call Nurse</p>
+        <p class="sub">Request home visit</p>
+      </div>
+    </a>
+
+    <a class="tile t-red" href="/sos/">
+      <div class="icon">🆘</div>
+      <div>
+        <p class="title">SOS Emergency</p>
+        <p class="sub">Send alert now</p>
+      </div>
+    </a>
+
+    <a class="tile t-cyan" href="/pharmacy/">
+      <div class="icon">💊</div>
+      <div>
+        <p class="title">Pharmacy</p>
+        <p class="sub">Order medicine</p>
+      </div>
+    </a>
+
+    <a class="tile t-gray" href="/ai/">
+      <div class="icon">🤖</div>
+      <div>
+        <p class="title">AI Assistant</p>
+        <p class="sub">Quick guidance</p>
+      </div>
+    </a>
+
+    <!-- ✅ Work as Nurse (opens modal) -->
+    <a class="tile t-blue" href="#" onclick="openJobs(); return false;">
+      <div class="icon">🧑‍⚕️</div>
+      <div>
+        <p class="title">Work as Nurse</p>
+        <p class="sub">Register & get jobs</p>
+      </div>
+    </a>
+
+    <a class="tile t-gray" href="/jobs/feedback/">
+      <div class="icon">⭐</div>
+      <div>
+        <p class="title">Rate a Nurse</p>
+        <p class="sub">Leave feedback</p>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="panel">
+    <p class="panelTitle">Nearby (demo)</p>
+
+    <!-- ✅ City Medical Center: GPS -> redirects with lat/lng like before -->
+    <a class="rowLink" href="#" onclick="openHospitalsGPS(); return false;">
+      <div class="row">
+        <div>🏥 City Medical Center</div>
+        <span>Find nearby →</span>
+      </div>
+    </a>
+
+    <!-- Local Pharmacy: normal link -->
+    <a class="rowLink" href="/pharmacy/">
+      <div class="row">
+        <div>💊 Local Pharmacy</div>
+        <span>800 m →</span>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<!-- ✅ ONLY ADDED: Nurse Registration Modal (doesn't change other UI) -->
+<div id="jobModal" class="modalOverlay" onclick="closeJobsOnBg(event)">
+  <div class="modalCard">
+    <div class="modalTitle">Nurse Registration</div>
+    <div class="modalSub">Apply to work with MedSupport (demo)</div>
+
+    <form id="jobForm" method="post" action="/jobs/apply/">
+      {% csrf_token %}
+      <input class="input" name="full_name" placeholder="Full name" required>
+      <input class="input" name="phone" placeholder="Phone number" required>
+      <input class="input" name="city" placeholder="City" required>
+      <input class="input" name="certification" placeholder="Certification (RN, First Aid)" required>
+      <textarea class="input" name="skills" placeholder="Skills / experience (e.g. injections, IV, 2 years)" required></textarea>
+      <button class="btnPrimary" type="submit">Submit Application</button>
+    </form>
+
+    <div id="jobSuccess" class="successBox">
+      ✅ Your submission was accepted successfully.<br>
+      Please wait — we will contact you.
+    </div>
+
+    <button class="btnGhost" type="button" onclick="closeJobs()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  function openHospitalsGPS(){
+    if(!navigator.geolocation){
+      alert("Geolocation not supported.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        window.location.href = `/nearby/hospitals/?lat=${lat}&lng=${lng}`;
+      },
+      () => alert("Location permission denied."),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  /* ✅ ONLY ADDED: Work-as-Nurse modal logic */
+  function openJobs(){
+    const modal = document.getElementById("jobModal");
+    const form = document.getElementById("jobForm");
+    const ok = document.getElementById("jobSuccess");
+    if(!modal || !form || !ok) return;
+
+    modal.style.display = "block";
+    form.style.display = "block";
+    ok.style.display = "none";
+  }
+
+  function closeJobs(){
+    const modal = document.getElementById("jobModal");
+    if(modal) modal.style.display = "none";
+  }
+
+  function closeJobsOnBg(e){
+    if(e.target && e.target.id === "jobModal") closeJobs();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("jobForm");
+    if(!form) return;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const csrf = data.get("csrfmiddlewaretoken");
+
+      try{
+        const res = await fetch(form.action, {
+          method: "POST",
+          body: data,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": csrf
+          }
+        });
+
+        let out = null;
+        try { out = await res.json(); } catch(_) {}
+
+        if(!out || out.ok){
+          form.style.display = "none";
+          document.getElementById("jobSuccess").style.display = "block";
+        } else {
+          alert("Something went wrong. Try again.");
+        }
+      }catch(err){
+        alert("Network error. Try again.");
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

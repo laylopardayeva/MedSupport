@@ -1,0 +1,168 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pharmacy • MedSupport</title>
+
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;background:#f6f7fb;color:#111;}
+    .shell{max-width:560px;margin:0 auto;padding:18px;}
+    .top{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .logo{width:42px;height:42px;border-radius:14px;object-fit:contain;background:#fff;border:1px solid #e6e8f0;padding:6px;}
+    .card{background:#fff;border:1px solid #e6e8f0;border-radius:20px;padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.06);}
+    .h1{font-size:22px;font-weight:900;margin:0 0 6px 0;}
+    .muted{color:#6b7280;font-size:13px;margin:0 0 14px 0;}
+    label{display:block;font-size:12px;color:#6b7280;margin:12px 0 6px;}
+    input,select{width:100%;box-sizing:border-box;padding:12px;border-radius:14px;border:1px solid #e6e8f0;font-size:14px;outline:none;background:#fff;}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media (max-width:520px){ .row{grid-template-columns:1fr;} }
+
+    .list{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+
+    .med{
+      border:1px solid #e6e8f0;border-radius:16px;padding:12px;background:#fff;
+      display:grid;grid-template-columns: 28px 1fr 90px;gap:10px;align-items:center;
+    }
+    @media (max-width:520px){
+      .med{grid-template-columns: 28px 1fr; grid-template-rows:auto auto; }
+      .qty{grid-column: 1 / -1; width:100%;}
+    }
+    .med-name{font-weight:900;line-height:1.2;}
+    .med-price{font-size:12px;color:#6b7280;margin-top:4px;}
+    .pill{font-size:12px;color:#6b7280;background:#f3f4f6;border:1px solid #e6e8f0;padding:4px 8px;border-radius:999px;display:inline-block;margin-top:6px;}
+    .qty{width:90px;padding:10px;border-radius:14px;border:1px solid #e6e8f0;outline:none;text-align:center;}
+
+    .btn{margin-top:16px;width:100%;padding:14px;border:none;border-radius:16px;font-weight:900;cursor:pointer;background:#6f7bf7;color:#fff;font-size:15px;}
+    .btn2{margin-top:10px;width:100%;padding:14px;border:1px solid #e6e8f0;border-radius:16px;font-weight:800;cursor:pointer;background:#fff;}
+    a{text-decoration:none;color:inherit;}
+
+    .ok{margin:14px 0;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:12px;border-radius:16px;font-size:13px;}
+    .warn{margin:14px 0;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px;border-radius:16px;font-size:13px;}
+
+    .locStatus{font-size:12px;color:#6b7280;margin-top:6px;}
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="top">
+      <img class="logo" src="{% static 'img/logo.png' %}" alt="MedSupport logo">
+      <div>
+        <div style="font-weight:900;">MedSupport</div>
+        <div style="font-size:12px;color:#6b7280;">Pharmacy</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="h1">Order medicine</div>
+      <p class="muted">Select a pharmacy, then choose medicines (demo).</p>
+
+      {% if no_data %}
+        <div class="warn">Demo pharmacies/medicines were created ✅</div>
+      {% endif %}
+
+      {% if saved %}
+        <div class="ok">
+          ✅ Order received! <b>Courier is on the way.</b><br>
+          ETA: {{ eta_text }}<br>
+          Order ID: #{{ order_id }}<br>
+          Total: {{ total }}<br>
+          {% if latitude and longitude %}
+            Location saved: {{ latitude }}, {{ longitude }}
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- ✅ current location saved here -->
+        <input type="hidden" name="latitude" id="lat">
+        <input type="hidden" name="longitude" id="lng">
+
+        <div class="row">
+          <div>
+            <label>Your name</label>
+            <input name="customer_name" placeholder="Your name" required>
+          </div>
+          <div>
+            <label>Phone</label>
+            <input name="phone" placeholder="+998 ..." required>
+          </div>
+        </div>
+
+        <label>Delivery address</label>
+        <input name="address" placeholder="Street, city" required>
+
+        <button class="btn2" type="button" onclick="getLocation()">📍 Use my current location</button>
+        <div class="locStatus" id="locStatus">Location not added.</div>
+
+        <label>Select pharmacy</label>
+        <!-- onchange submits so medicines refresh for that pharmacy -->
+        <select name="pharmacy_id" required onchange="this.form.submit()">
+          {% for p in pharmacies %}
+            <option value="{{ p.id }}" {% if p.id == selected_pharmacy_id %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <label>Medicines (select + quantity)</label>
+        <div class="list">
+          {% for m in medicines %}
+            <div class="med">
+              <input type="checkbox" name="medicine_ids" value="{{ m.id }}">
+              <div>
+                <div class="med-name">{{ m.name }}</div>
+                <div class="med-price">{{ m.price }}</div>
+                {% if m.in_stock %}
+                  <span class="pill">In stock</span>
+                {% else %}
+                  <span class="pill">Out of stock</span>
+                {% endif %}
+              </div>
+              <input class="qty" type="number" min="1" value="1" name="qty_{{ m.id }}">
+            </div>
+          {% empty %}
+            <div class="warn">No medicines for this pharmacy.</div>
+          {% endfor %}
+        </div>
+
+        <label>Can’t find your medicine?</label>
+        <input name="custom_medicine" placeholder="Type medicine name (example: Amoxicillin 500mg)">
+        <input name="custom_qty" type="number" min="1" value="1" style="margin-top:10px;">
+
+        <button class="btn" type="submit" name="action" value="order">Place Order</button>
+        <a href="/"><button class="btn2" type="button">← Back to Home</button></a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function getLocation() {
+      const status = document.getElementById("locStatus");
+
+      if (!navigator.geolocation) {
+        status.textContent = "Geolocation not supported in this browser.";
+        return;
+      }
+
+      status.textContent = "Detecting location…";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          document.getElementById("lat").value = pos.coords.latitude;
+          document.getElementById("lng").value = pos.coords.longitude;
+          status.textContent = "✅ Location added (latitude/longitude saved with order).";
+        },
+        () => {
+          status.textContent = "❌ Location permission denied.";
+        },
+        { enableHighAccuracy:true, timeout:10000 }
+      );
+    }
+  </script>
+</body>
+</html>
