@@ -21,7 +21,7 @@ def ai_assistant(request):
             reply = generate_ai_reply(user_text, history)
             ChatMessage.objects.create(role="assistant", text=reply)
 
-        return redirect("ai_assistant")
+        return redirect("/ai/")
 
     messages = ChatMessage.objects.all().order_by("created_at")
     return render(request, "ai/page.html", {"messages": messages})
